@@ -226,12 +226,25 @@
   justify-content: center;
   align-items: center;
 }
-#birthday-video {
+#video-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
   width: 100%;
   max-width: 60dvw;
-  max-height: 100dvh;
+}
+#birthday-video {
+  width: 100%;
   border-radius: 12px;
   outline: none;
+}
+#video-caption {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+  color: #993556;
+  text-align: center;
+  opacity: 0.85;
 }
 #letter-stage {
   position: fixed;
@@ -304,9 +317,12 @@
 </div>
 <!-- VIDEO STAGE -->
 <div id="video-stage">
-  <video id="birthday-video" playsinline autoplay muted>
-  <source src="edit.mp4" type="video/mp4">
-  </video>
+  <div id="video-wrap">
+    <video id="birthday-video" playsinline muted>
+      <source src="edit.mp4" type="video/mp4">
+    </video>
+    <p id="video-caption">Small shoutout for your friends</p>
+  </div>
 </div>
 <!-- LETTER STAGE -->
 <div id="letter-stage">
