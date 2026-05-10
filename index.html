@@ -366,16 +366,16 @@
   ];
  
   const flowerPresets = [
-    { x: 47, y: 55, rot: -10, s: 120, img: 'Lily.png' },
-    { x: 50, y: 61, rot: 45,  s: 120, img: 'Daisy.png' },
-    { x: 53, y: 59, rot: -5,  s: 120, img: 'HYDRANGEA.png' },
-    { x: 56, y: 53, rot: 15,  s: 120, img: 'Lily.png' },
-    { x: 50, y: 68, rot: -45, s: 120, img: 'ROSE.png' },
-    { x: 46, y: 63, rot: 0,   s: 120, img: 'HYDRANGEA.png' },
-    { x: 55, y: 65, rot: 45,  s: 120, img: 'ROSE.png' },
-    { x: 51, y: 54, rot: -45, s: 120, img: 'ROSE.png' },
-    { x: 58, y: 58, rot: 45,  s: 120, img: 'Daisy.png' },
-  ];
+  { dx:  13, dy:  15, rot:   0, s: 115, img: 'ROSE.png' },
+  { dx: -45, dy: -31, rot: -15, s: 115, img: 'Lily.png' },
+  { dx:  80, dy: -35, rot:  15, s: 115, img: 'HYDRANGEA.png' },
+  { dx:  17, dy: -62, rot:  -5, s: 115, img: 'Daisy.png' },
+  { dx: -87, dy: -61, rot: -20, s: 115, img: 'ROSE.png' },
+  { dx: -40, dy:-116, rot: -10, s: 115, img: 'HYDRANGEA.png' },
+  { dx:  25, dy:-146, rot:  20, s: 115, img: 'Lily.png' },
+  { dx: 100, dy:-122, rot:  25, s: 115, img: 'ROSE.png' },
+  { dx: 129, dy: -75, rot:  10, s: 115, img: 'Daisy.png' },
+];
  
   // ── EDIT YOUR FLOWER MESSAGES HERE ──
   // One message per tap, in order. Shown in the centre of the screen above the bouquet.
@@ -601,22 +601,36 @@ function spawnFlower() {
   if (flowerCount >= flowerPresets.length) return;
 
   const garden = document.getElementById('flower-garden');
+  const wrap   = document.getElementById('main-wrap');
   const preset = flowerPresets[flowerCount];
   const message = flowerMessages[flowerCount] || '';
+
+  // Get the wrap image's position in the viewport
+  const rect = wrap.getBoundingClientRect();
+  const wrapCenterX = rect.left + rect.width  / 2;
+  const wrapCenterY = rect.top + rect.height * 0.38;
+
+  // Convert to px absolute inside #flower-garden (which is fixed inset:0)
+  const left = wrapCenterX + preset.dx;
+  const top  = wrapCenterY + preset.dy;
 
   const img = document.createElement('img');
   img.src = preset.img;
   img.className = 'spawned-flower';
-  img.style.left = preset.x + '%';
-  img.style.top = preset.y + '%';
+  img.style.left  = left + 'px';
+  img.style.top   = top  + 'px';
   img.style.width = preset.s + 'px';
   img.style.setProperty('--r', preset.rot + 'deg');
+
+  // Override the CSS % positioning — use px instead
+  img.style.transform = 'translate(-50%, -50%) scale(0)';
+
   garden.appendChild(img);
 
   if (message) showMessage(message);
 
   flowerCount++;
- if (flowerCount >= flowerPresets.length) {
+  if (flowerCount >= flowerPresets.length) {
     setTimeout(startVideo, 2000);
   }
 }
