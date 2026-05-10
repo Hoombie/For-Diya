@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>For Diya</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #000;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Courier New', Courier, monospace;
+      overflow: hidden;
+      transition: background 1s ease;
+    }
+ 
+    /* ── TERMINAL ── */
+    #terminal { width: 100%; max-width: 600px; padding: 20px; transition: opacity 0.6s; }
+    .line { display: flex; align-items: flex-start; margin-bottom: 12px; }
+    .prompt { color: #fff; margin-right: 10px; }
+    .text { color: #fff; line-height: 1.4; }
+    #cursor { display: inline-block; width: 8px; height: 1.1rem; background: #fff; animation: blink 1s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+ 
+    /* ── HEARTS SCREEN ── */
+    #hearts-stage {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      overflow: hidden;
+      background: linear-gradient(160deg, #fbeaf0 0%, #f4c0d1 60%, #ed93b1 100%);
+      justify-content: center;
+      align-items: center;
+    }
+    .heart {
+      position: absolute;
+      pointer-events: none;
+      animation: floatUp linear forwards;
+      line-height: 1;
+      user-select: none;
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(0) rotate(var(--rot)) scale(var(--scale)); opacity: 0; }
+      10%  { opacity: 1; }
+      85%  { opacity: 1; }
+      100% { transform: translateY(-110vh) rotate(calc(var(--rot) + 20deg)) scale(var(--scale)); opacity: 0; }
+    }
+ 
+    /* ── POLAROIDS ── */
+    .polaroid {
+      position: absolute;
+      background: #fff;
+      padding: 10px 10px 40px 10px;
+      box-shadow: 2px 4px 18px rgba(0,0,0,0.18);
+      width: 150px;
+      opacity: 0;
+      animation: polaroidDrift linear forwards;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .polaroid img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      display: block;
+      background: #e0c8d0;
+    }
+    .polaroid .caption {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 10px;
+      color: #555;
+      text-align: center;
+      margin-top: 6px;
+      line-height: 1.3;
+      padding: 0 4px;
+    }
+    @keyframes polaroidDrift {
+      0%   { opacity: 0; transform: translateY(30px) rotate(var(--tilt)) scale(0.85); }
+      12%  { opacity: 1; transform: translateY(0px) rotate(var(--tilt)) scale(1); }
+      80%  { opacity: 1; transform: translateY(-8px) rotate(var(--tilt)) scale(1); }
+      100% { opacity: 0; transform: translateY(-20px) rotate(var(--tilt)) scale(0.95); }
+    }
+ 
+    #hearts-proceed-btn {
+      z-index: 20;
+      padding: 12px 36px;
+      font-size: 15px;
+      font-weight: 500;
+      background: #d4537e;
+      color: #fff;
+      border: none;
+      border-radius: 99px;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.6s ease, transform 0.6s ease, background 0.2s;
+      pointer-events: none;
+      font-family: 'Courier New', Courier, monospace;
+    }
+    #hearts-proceed-btn.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    #hearts-proceed-btn:hover { background: #993556; }
+    #hearts-proceed-btn:active { transform: scale(0.97); }
+    #hearts-timer-wrap {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 160px;
+      height: 4px;
+      background: rgba(212,83,126,0.25);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    #hearts-timer-bar {
+      height: 100%;
+      width: 100%;
+      background: #d4537e;
+      border-radius: 99px;
+      transform-origin: left;
+    }
+ 
+    /* ── BOUQUET STAGE ── */
+    #bouquet-stage {
+      position: fixed;
+      inset: 0;
+      background:  #fbeaf0;
+      z-index: 1000;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    #flower-garden {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 20;
+    }
+    #main-wrap {
+      position: absolute;
+      bottom: 5%;
+      width: 80%;
+      max-width: 350px;
+      z-index: 5;
+      pointer-events: none;
+    }
+    .spawned-flower {
+      position: absolute;
+      width: 150px;
+      height: auto;
+      transform: translate(-50%, -50%) scale(0);
+      animation: popUp 0.4s forwards;
+      pointer-events: none;
+    }
+    @keyframes popUp { to { transform: translate(-50%, -50%) scale(1) rotate(var(--r)); } }
+ 
+    .tap-instruction {
+      position: absolute;
+      top: 20px;
+      color: aqua;
+      font-weight: bold;
+      z-index: 30;
+      font-family: 'Courier New', Courier, monospace;
+      pointer-events: none;
+    }
+ 
+    /* ── CENTRE MESSAGE BOX ── */
+    #flower-message-box {
+      position: absolute;
+    top: 12%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    background: #fff;
+    border-radius: 14px;
+    padding: 16px 20px 20px;
+    width: min(80vw, 320px);
+    text-align: center;
+    box-shadow: 2px 4px 20px rgba(0,0,0,0.18);
+    pointer-events: none;
+    line-height: 1.6;
+    opacity: 0;
+    visibility: hidden;
+  }
+  #flower-message-box .msg-text {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    color: #993556;
+  }
+  #flower-message-box::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 10px solid transparent;
+    border-top-color: #fff;
+    border-bottom: none;
+  }
+  @keyframes msgFadeIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(-6px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+  #flower-message-box.show {
+    visibility: visible;
+    animation: msgFadeIn 0.4s ease forwards;
+  }
+
+  #video-stage {
+  position: fixed;
+  inset: 0;
+  background:  #fbeaf0;
+  z-index: 2000;
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+#birthday-video {
+  width: 100%;
+  max-width: 60dvw;
+  max-height: 100dvh;
+  border-radius: 12px;
+  outline: none;
+}
+#letter-stage {
+  position: fixed;
+  inset: 0;
+  background: #fbeaf0;
+  z-index: 3000;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+}
+#letter-box {
+  background: #fff;
+  border-radius: 16px;
+  padding: 36px 32px 28px;
+  max-width: 480px;
+  width: 100%;
+  max-height: 85dvh;
+  overflow-y: auto;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+#letter-text {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.8;
+}
+#surprise-btn {
+  align-self: center;
+  padding: 12px 32px;
+  font-size: 14px;
+  font-family: 'Courier New', Courier, monospace;
+  background: #d4537e;
+  color: #fff;
+  border: none;
+  border-radius: 99px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+#surprise-btn:hover { background: #993556; }
+#surprise-btn:active { transform: scale(0.97); }
+  </style>
+</head>
+<body>
+ 
+<!-- TERMINAL -->
+<div id="terminal">
+  <div class="line" id="line1">
+    <span class="prompt">></span>
+    <span class="text" id="text1"></span>
+    <span id="cursor"></span>
+  </div>
+</div>
+ 
+<!-- HEARTS SCREEN -->
+<div id="hearts-stage">
+  <button id="hearts-proceed-btn">Continue ♥</button>
+  <div id="hearts-timer-wrap"><div id="hearts-timer-bar"></div></div>
+</div>
+ 
+<!-- BOUQUET STAGE -->
+<div id="bouquet-stage">
+  <div id="flower-message-box"><span class="msg-text"></span></div>
+  <img src="WRAPPING.png" id="main-wrap" alt="bouquet wrap">
+  <div id="flower-garden"></div>
+  <div class="tap-instruction">Tap to add a flower!</div>
+</div>
+<!-- VIDEO STAGE -->
+<div id="video-stage">
+  <video id="birthday-video" playsinline autoplay muted>
+  <source src="edit.mp4" type="video/mp4">
+  </video>
+</div>
+<!-- LETTER STAGE -->
+<div id="letter-stage">
+  <div id="letter-box"
+    <div id="letter-text">
+      <p>Dear Diya,</p>
+      <br>
+      <p>
+        Wowzers! The long anticipated 2-1 has finally arrived. I truly hope the event and day live up to your wildest dreams
+        because you, the most special person in the world, is so deserving of the most special event ever. Over the last 2 and a bit years you've become the person 
+        I look for in all the good moments. When anything good happens, any tea drops or some crazy event occurs, my first thoughts
+        are always - gotta remember to tell her this! I know often it takes some prompting to get that out but I swear this is true!
+        I know cards often become repetetive, I particularly feel that I find myself gravitate towards using the same adjectives
+        to describe you, mabye because I have a limited vocabulary, but I prefer to think that it's because no matter what happens
+        in life, you never deviate from who you are or how you carry yourself. There is always something new to admire about you,
+        everyday it seems you're doing something, being something worth admiration! You've changed the way I experience and live life. 
+        Thing's always feel brighter with you in them, even in the small moments like sitting together doing nothing, talking on the 
+        phone or quick glances across the room when you're stuck in conversation with someone random. I admire you far more than I say
+        out loud, or in anyway I am ever able to express in any act or service. Its simply for who you are when no ones looking, no ones
+        around, when your teaching me (forcing unto me) your daily habits or endless wisdom. All of it matters to me more than you could 
+        know. I wish you could see yourself from anyone elses perspective because you would see someone truly unforgettable. You have
+        a unique, unrepeatable way of making those around you comfortable, seen, understood and loved (only if applicable), something that
+        I only wish I was capable of. I know of no one else that is capable of leaving a mark on the heart like you, as mentioned you have a way
+        of making the mundane moments the best, into a moment of time I hope never passes. Many people around us may do impressive things here 
+        and there, people around the world will do the same, but none of them will amount to the amazing, amazing, amazing things i //KNOW// you
+        will achieve over the course of the next, 1 - 5 - 10 years. You are full of, how i see it, (self) unrealised potential, 
+        and I know when you really discover what you are capable of as yourself, everything will start clicking into place for you. 
+        However short or long it is I know you will stay undefeated in doing remarkable and amazing things, all whilst being true to yourself. 
+        Please never forget Diya, you are amazing, deeply loved and appreciated not just by myself or your family, but every single person in that 
+        slideshow and in all the photos I had to omit because capcut doesn't have a long enough template for me to use. You have become
+        a pillar of my life, part of the everyday moments, far more than just the highlights. Truly the greatest person I have ever had 
+        the privelege of bringing into my life. You deserve more than just the world, and I hope in life you get the moon and stars too.
+      </p>
+      <br>
+      <p>Love,<br>Hame<br>PS:The buttons contents are not finished obviously requiring input+guidance from yourself. I hope you like the first design. Photos are what I could get off IG.</p>
+      <p>After-edit: I made this in advance and still wanted to share. I wrote not a word of a lie, as always.
+        <br> I hope you still appreciate it. You do mean the world to me. 
+      </p>
+    </div>
+    <button id="surprise-btn">Before You Leave</button>
+  </div>
+</div>
+<script>
+  const messages = [
+    { text: 'Hello, Diya' },
+    { text: 'Today is your birthday!' },
+    { text: 'I wanted to do something different this year...' },
+    { text: 'I know how much you lurb physical letters :/' },
+    { text: 'I hope you like this digital card just as much' },
+    { text: 'I wanted to make sure your 21st card was extra permanent' },
+    { text: 'I hope today is special for you -->' },
+  ];
+ 
+  const flowerPresets = [
+    { x: 47, y: 55, rot: -10, s: 120, img: 'Lily.png' },
+    { x: 50, y: 61, rot: 45,  s: 120, img: 'Daisy.png' },
+    { x: 53, y: 59, rot: -5,  s: 120, img: 'HYDRANGEA.png' },
+    { x: 56, y: 53, rot: 15,  s: 120, img: 'Lily.png' },
+    { x: 50, y: 68, rot: -45, s: 120, img: 'ROSE.png' },
+    { x: 46, y: 63, rot: 0,   s: 120, img: 'HYDRANGEA.png' },
+    { x: 55, y: 65, rot: 45,  s: 120, img: 'ROSE.png' },
+    { x: 51, y: 54, rot: -45, s: 120, img: 'ROSE.png' },
+    { x: 58, y: 58, rot: 45,  s: 120, img: 'Daisy.png' },
+  ];
+ 
+  // ── EDIT YOUR FLOWER MESSAGES HERE ──
+  // One message per tap, in order. Shown in the centre of the screen above the bouquet.
+  const flowerMessages = [
+    "Diya, you are the most amazing, heartfull, inspiring, hardworking, intelligent, awestrikingly beautiful person I know",
+    "I am endlessly proud of you, the way you carry yourself, care for your friends and family and manage the jillions of stressors in your life",
+    "You always deserve to have the most amazing birthday. I know how much this means to you and I hope the gifts and support shown to you reflects how much the people around you care for you",
+    "Everyone is so excited to celebrate YOU. For no reason other than the FACT that you are loved, cherished and endlessly supported by all your friends and family",
+    "You have made my life far better (and a little more stresseful) since you came into it, and I hope it continues that you make it better as the years keep coming",
+    "Couldn't imagine quick daily debriefs, fighting to find time to hang out with or sleeping downstairs at anyone elses house",
+    "Or dealing with anyone elses stanky ahh dog (love you Boonie)",
+    "You are an amazing and special person Diya, I hope you are truly able to see that yourself, because everyone around you both sees it and knows it",
+    "Here's to you, Diya, Happiest of birthdays, you deserve the world. I love you. (PS. theres more don't leave, also check your volume)",
+  ];
+ 
+  // ── EDIT YOUR POLAROID PHOTOS HERE ──
+  // src: filename of your image (same folder as index.html)
+  // caption: small message shown underneath
+  const polaroids = [
+    { src: '2.jpg', caption: 'To more mirror selfies' },
+    { src: '3.jpg', caption: 'I should def be focussed on the road' },
+    { src: '5.jpg', caption: 'To dressing up with you' },
+    { src: '6.jpg', caption: 'Random Halloween parties' },
+    { src: '11.jpg', caption: 'To laughing at Bel and almost dying' },
+    { src: '12.jpg', caption: 'To matching ties and dresses' },
+    { src: '15.jpg', caption: 'Love leaning down in photos' },
+    { src: '56.jpg', caption: 'Seriously let me drive bruh' },
+    { src: '54.jpg', caption: 'To more and more and More fun!!!' },
+    { src: '18.jpg', caption: 'To you annoying uber drivers' },
+    { src: '19.jpg', caption: 'lwk never remembered this photo but its cute...' },
+    { src: '20.jpg', caption: 'To more events and parties with you' },
+    { src: '22.jpg', caption: 'To having fun' },
+    { src: '23.jpg', caption: 'To you NOT looking after me LOL' },
+    { src: '24.jpg', caption: 'To dressing up at the races' },
+    { src: '25.jpg', caption: 'To annoying you...:0' },
+    { src: '26.jpg', caption: 'To cute pics with you' },
+    { src: '52.jpg', caption: 'To Melb v Hawks' },
+    { src: '50.jpg', caption: 'No caption required LOL' },
+    { src: '29.jpg', caption: 'To driving you around (when I can)' },
+    { src: '62.jpg', caption: 'To our Beginnings LOL' },
+    { src: '61.jpg', caption: 'Thanks Mouldings 18th fr' },
+    { src: '31.jpg', caption: 'To endless selfies' },
+    { src: '32.jpg', caption: 'More and more and more selfies' },
+    { src: '49.jpg', caption: 'To good IG pics' },
+    { src: '47.jpg', caption: 'To facemasks and skincarring (yes i do it)' },
+    { src: '35.jpg', caption: 'Dinner and bad photos by my mum' },
+    { src: '36.jpg', caption: 'I love this photo' },
+    { src: '46.jpg', caption: 'weird selfies to your friends' },
+    { src: '45.jpg', caption: 'to trying not to get your hair wet' },
+    { src: '39.jpg', caption: 'Melbourne and no hawks!!!' },
+    { src: '41.jpg', caption: 'Cant forget badminton' },
+  ];
+ 
+  // ── TERMINAL ──────────────────────────────────────────────
+  const textEl = document.getElementById('text1');
+  const cursor = document.getElementById('cursor');
+ 
+  function typeText(text, done) {
+    textEl.textContent = '';
+    let i = 0;
+    function next() {
+      if (i < text.length) { textEl.textContent += text[i++]; setTimeout(next, 60); }
+      else { if (done) setTimeout(done, 900); }
+    }
+    next();
+  }
+ 
+  function runSequence(index) {
+    if (index >= messages.length) {
+      cursor.style.display = 'none';
+      setTimeout(startHeartsScreen, 1200);
+      return;
+    }
+    typeText(messages[index].text, () => runSequence(index + 1));
+  }
+ 
+  setTimeout(() => runSequence(0), 1000);
+ 
+  // ── HEARTS SCREEN ──────────────────────────────────────────
+  const HEART_CHARS = ['♥','♡','❤'];
+  const HEART_COLORS = ['#d4537e','#993556','#f4c0d1','#ed93b1','#72243e','#e87fa6','#c23a6a','#fbeaf0'];
+  const HEARTS_DURATION = 25000;
+  let heartsInterval, polaroidInterval;
+  let polaroidIndex = 0;
+ 
+  // Grid of slots so polaroids don't all bunch in one spot
+  const slots = [
+    { x: 2,  y: 3  }, { x: 22, y: 5  }, { x: 44, y: 2  }, { x: 64, y: 4  },
+    { x: 3,  y: 40 }, { x: 23, y: 38 }, { x: 45, y: 41 }, { x: 65, y: 39 },
+    { x: 5,  y: 68 }, { x: 25, y: 65 }, { x: 47, y: 67 }, { x: 67, y: 66 },
+  ];
+  let slotOrder = [...slots].sort(() => Math.random() - 0.5);
+  let slotIdx = 0;
+ 
+  function spawnHeart() {
+    const stage = document.getElementById('hearts-stage');
+    const el = document.createElement('span');
+    el.className = 'heart';
+    el.textContent = HEART_CHARS[Math.floor(Math.random() * HEART_CHARS.length)];
+    const size = 16 + Math.random() * 34;
+    const x = 3 + Math.random() * 94;
+    const rot = -30 + Math.random() * 60;
+    const scale = 0.6 + Math.random() * 0.9;
+    const dur = 3.2 + Math.random() * 4;
+    el.style.cssText = `left:${x}%;bottom:-10%;font-size:${size}px;color:${HEART_COLORS[Math.floor(Math.random()*HEART_COLORS.length)]};--rot:${rot}deg;--scale:${scale};animation-duration:${dur}s;`;
+    stage.appendChild(el);
+    setTimeout(() => el.remove(), dur * 1000);
+  }
+ 
+  function spawnPolaroid() {
+    if (polaroids.length === 0) return;
+    const stage = document.getElementById('hearts-stage');
+    const p = polaroids[polaroidIndex % polaroids.length];
+    polaroidIndex++;
+ 
+    const slot = slotOrder[slotIdx % slotOrder.length];
+    slotIdx++;
+    if (slotIdx % slotOrder.length === 0) {
+      slotOrder = [...slots].sort(() => Math.random() - 0.5);
+    }
+ 
+    const div = document.createElement('div');
+    div.className = 'polaroid';
+ 
+    const img = document.createElement('img');
+    img.src = p.src;
+    img.alt = p.caption;
+ 
+    const cap = document.createElement('div');
+    cap.className = 'caption';
+    cap.textContent = p.caption;
+ 
+    div.appendChild(img);
+    div.appendChild(cap);
+ 
+    const tilt = -14 + Math.random() * 28;
+    const duration = 7 + Math.random() * 3;
+    div.style.cssText = `left:${slot.x}%;top:${slot.y}%;--tilt:${tilt}deg;animation-duration:${duration}s;`;
+    stage.appendChild(div);
+    setTimeout(() => div.remove(), duration * 1000);
+  }
+ 
+  function spawnBurst() {
+    // Spawn 3 polaroids at slightly staggered times for a burst effect
+    spawnPolaroid();
+    setTimeout(spawnPolaroid, 400);
+    setTimeout(spawnPolaroid, 800);
+  }
+ 
+  function startHeartsScreen() {
+    const terminal = document.getElementById('terminal');
+    terminal.style.opacity = '0';
+ 
+    setTimeout(() => {
+      terminal.style.display = 'none';
+ 
+      const stage = document.getElementById('hearts-stage');
+      stage.style.display = 'flex';
+ 
+      const bar = document.getElementById('hearts-timer-bar');
+      bar.style.transform = 'scaleX(1)';
+      bar.style.transition = `transform ${HEARTS_DURATION}ms linear`;
+      requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.transform = 'scaleX(0)'; }));
+ 
+      spawnHeart();
+      heartsInterval = setInterval(spawnHeart, 300);
+ 
+      // Initial burst of 4 polaroids right away, then 3 more every 2.5s
+      setTimeout(() => {
+        spawnBurst();
+        setTimeout(spawnPolaroid, 1200);
+        polaroidInterval = setInterval(spawnBurst, 2500);
+      }, 800);
+ 
+      setTimeout(() => {
+        clearInterval(heartsInterval);
+        clearInterval(polaroidInterval);
+        document.getElementById('hearts-timer-wrap').style.display = 'none';
+        document.getElementById('hearts-proceed-btn').classList.add('visible');
+      }, HEARTS_DURATION);
+ 
+    }, 700);
+  }
+ 
+  document.getElementById('hearts-proceed-btn').addEventListener('click', function () {
+    const stage = document.getElementById('hearts-stage');
+    stage.style.transition = 'opacity 0.6s';
+    stage.style.opacity = '0';
+    setTimeout(() => {
+      stage.style.display = 'none';
+      startBouquet();
+    }, 700);
+  });
+ 
+  // ── BOUQUET STAGE ──────────────────────────────────────────
+  let flowerCount = 0;
+  let msgTimeout;
+ 
+  function startBouquet() {
+    document.body.style.background = '#fffafa';
+    const bStage = document.getElementById('bouquet-stage');
+    bStage.style.display = 'flex';
+ 
+    const garden = document.getElementById('flower-garden');
+    garden.addEventListener('mousedown', function () { spawnFlower(); });
+    garden.addEventListener('touchstart', function (e) {
+      e.preventDefault();
+      spawnFlower();
+    }, { passive: false });
+  }
+ 
+  const msgBox = document.getElementById('flower-message-box');
+const msgText = msgBox.querySelector('.msg-text');
+
+function showMessage(text) {
+  msgBox.classList.remove('show');
+  void msgBox.offsetWidth; // forces reflow so animation restarts
+  msgText.textContent = text;
+  msgBox.classList.add('show');
+}
+
+function spawnFlower() {
+  if (flowerCount >= flowerPresets.length) return;
+
+  const garden = document.getElementById('flower-garden');
+  const preset = flowerPresets[flowerCount];
+  const message = flowerMessages[flowerCount] || '';
+
+  const img = document.createElement('img');
+  img.src = preset.img;
+  img.className = 'spawned-flower';
+  img.style.left = preset.x + '%';
+  img.style.top = preset.y + '%';
+  img.style.width = preset.s + 'px';
+  img.style.setProperty('--r', preset.rot + 'deg');
+  garden.appendChild(img);
+
+  if (message) showMessage(message);
+
+  flowerCount++;
+ if (flowerCount >= flowerPresets.length) {
+    setTimeout(startVideo, 2000);
+  }
+}
+
+function startVideo() {
+  const bStage = document.getElementById('bouquet-stage');
+  bStage.style.transition = 'opacity 0.8s';
+  bStage.style.opacity = '0';
+
+  setTimeout(() => {
+    bStage.style.display = 'none';
+    const vStage = document.getElementById('video-stage');
+    vStage.style.display = 'flex';
+
+    const video = document.getElementById('birthday-video');
+    video.play().then(() => {
+      video.muted = false;
+    }).catch(() => {
+      video.muted = true;
+    });
+
+    // When video ends, cut straight to letter
+    video.addEventListener('ended', showLetter);
+  }, 800);
+}
+
+function showLetter() {
+  const vStage = document.getElementById('video-stage');
+  vStage.style.display = 'none';
+  const lStage = document.getElementById('letter-stage');
+  lStage.style.display = 'flex';
+}
+
+document.getElementById('surprise-btn').addEventListener('click', function () {
+  window.location.href = 'Kayra Website/index.html';
+});
+</script>
+</body>
+</html>
+ 

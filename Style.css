@@ -1,0 +1,33 @@
+#canvas-container {
+  position: relative; /* Becomes the anchor for the button */
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#action-layer {
+  position: absolute; /* Place it ON TOP of the canvas */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Center it perfectly */
+  z-index: 20;
+}
+
+#next-btn {
+  background: rgba(0, 0, 0, 0.6); /* Semi-transparent so heart shows through */
+  background-color: #fa5d9e;
+  border: 1px solid #fff;
+  padding: 12px 24px;
+  font-family: 'Courier New', Courier, monospace;
+  cursor: pointer;
+  border-radius: 4px;
+  backdrop-filter: blur(4px); /* Frosty glass effect */
+  transition: all 0.3s ease;
+}
+
+#next-btn:hover {
+  background: #fa5d9e;
+  color: #000;
+}

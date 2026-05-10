@@ -1,0 +1,428 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Jost:wght@200;300;400&display=swap');
+ 
+:root {
+  --blush: rgb(238, 136, 192);
+  --blush-light: rgba(238, 136, 192, 0.15);
+  --blush-mid: rgba(238, 136, 192, 0.35);
+  --cream: #faf6f0;
+  --cream-dark: #f2ebe0;
+  --ink: #1a1a1a;
+  --ink-soft: #555;
+  --white: #fff;
+}
+ 
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+ 
+html {
+  scroll-behavior: smooth;
+}
+ 
+body {
+  background-color: var(--cream);
+  font-family: 'Jost', sans-serif;
+  color: var(--ink);
+  overflow-x: hidden;
+}
+ 
+/* ── TOP BANNER ── */
+.top-banner {
+  width: 100%;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--cream);
+  border-bottom: 1px solid rgba(238, 136, 192, 0.25);
+  backdrop-filter: blur(8px);
+}
+ 
+.top-banner h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-weight: 300;
+  letter-spacing: 0.45em;
+  color: var(--blush);
+  text-transform: uppercase;
+}
+ 
+.contact {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 300;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--ink);
+  padding: 9px 22px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s, border-color 0.3s;
+}
+ 
+.contact:hover {
+  background: var(--blush);
+  color: var(--white);
+  border-color: var(--blush);
+}
+ 
+/* ── HERO ── */
+.second-banner {
+  width: 100%;
+  height: calc(100vh - 72px);
+  position: relative;
+  overflow: hidden;
+}
+ 
+.image-container1 {
+  width: 100%;
+  height: 100%;
+}
+ 
+.image-container1 img {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  object-position: center top;
+  display: block;
+}
+ 
+/* hero overlay text */
+.hero-overlay {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  pointer-events: none;
+}
+ 
+.hero-overlay p {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 200;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--white);
+  background: rgba(0,0,0,0.2);
+  padding: 8px 20px;
+  border-radius: 2px;
+  backdrop-filter: blur(4px);
+}
+ 
+/* ── CATALOGUE TITLE ── */
+.title-barrier {
+  width: 100%;
+  padding: 70px 20px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+ 
+.title-barrier h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.6rem, 4vw, 2.8rem);
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  color: var(--blush);
+  text-transform: uppercase;
+}
+ 
+.title-divider {
+  width: 60px;
+  height: 1px;
+  background: var(--blush);
+  opacity: 0.5;
+}
+ 
+/* ── GRID ── */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 10px 30px 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+ 
+.grid-item {
+  background: var(--cream-dark);
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8% 8% 8%;  /* extra bottom padding = polaroid white strip */
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+ 
+.grid-item::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--blush-light);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+ 
+.grid-item:hover {
+  transform: scale(1.03);
+  z-index: 10;
+}
+ 
+.grid-item:hover::after {
+  opacity: 1;
+}
+ 
+.grid-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+ 
+.grid-item:hover img {
+  transform: scale(1.06);
+}
+.grid-item .item-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(0.65rem, 1.2vw, 0.85rem);
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  color: var(--ink);
+  text-align: center;
+  margin-top: 8px;
+  text-transform: uppercase;
+}
+
+.grid-item .item-size {
+  font-family: 'Jost', sans-serif;
+  font-size: clamp(0.55rem, 1vw, 0.7rem);
+  font-weight: 200;
+  letter-spacing: 0.2em;
+  color: var(--ink-soft);
+  text-align: center;
+  margin-top: 3px;
+  text-transform: uppercase;
+}
+ 
+
+/* ── LIGHTBOX ── */
+.lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 10, 8, 0.92);
+  z-index: 999;
+  justify-content: center;
+  align-items: center;
+  cursor: zoom-out;
+  animation: fadeIn 0.25s ease;
+}
+ 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+ 
+.lightbox.active {
+  display: flex;
+}
+ 
+.lightbox-inner {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  animation: scaleIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+ 
+@keyframes scaleIn {
+  from { transform: scale(0.92); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+ 
+.lightbox img {
+  display: block;
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 2px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+}
+ 
+.lightbox-close {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.7);
+  font-size: 1.8rem;
+  font-weight: 100;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 8px;
+  transition: color 0.2s;
+}
+ 
+.lightbox-close:hover {
+  color: var(--blush);
+}
+ 
+/* ── FOOTER ── */
+footer {
+  text-align: center;
+  padding: 40px 20px;
+  border-top: 1px solid rgba(238, 136, 192, 0.2);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  color: var(--ink-soft);
+  font-weight: 200;
+  text-transform: uppercase;
+}
+ 
+/* CONTACT PAGE */
+.form-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 70px 20px 80px;
+}
+ 
+.form-section h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.6rem, 4vw, 2.8rem);
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  color: var(--blush);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+ 
+.form-divider {
+  width: 60px;
+  height: 1px;
+  background: var(--blush);
+  opacity: 0.5;
+  margin-bottom: 48px;
+}
+ 
+#form {
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+ 
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+ 
+#form label {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 300;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+ 
+#form input[type="text"],
+#form input[type="email"],
+#form textarea {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 300;
+  color: var(--ink);
+  background: var(--cream-dark);
+  border: 1px solid rgba(238, 136, 192, 0.3);
+  border-radius: 2px;
+  padding: 13px 16px;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
+  width: 100%;
+}
+ 
+#form input[type="text"]:focus,
+#form input[type="email"]:focus,
+#form textarea:focus {
+  border-color: var(--blush);
+  box-shadow: 0 0 0 3px var(--blush-light);
+  background: var(--white);
+}
+ 
+#form textarea {
+  resize: vertical;
+  min-height: 140px;
+  line-height: 1.6;
+}
+ 
+#form input[type="submit"] {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 300;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--ink);
+  border-radius: 2px;
+  padding: 13px 36px;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: background 0.3s, color 0.3s, border-color 0.3s;
+}
+ 
+#form input[type="submit"]:hover {
+  background: var(--blush);
+  color: var(--white);
+  border-color: var(--blush);
+}
+ 
+/* Validation feedback */
+#form input:invalid:not(:placeholder-shown),
+#form textarea:invalid:not(:placeholder-shown) {
+  border-color: #e07a7a;
+}
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .top-banner {
+    padding: 0 20px;
+  }
+ 
+  .grid-container {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 10px 15px 60px;
+    gap: 8px;
+  }
+ 
+  .title-barrier {
+    padding: 50px 20px 30px;
+  }
+}
+ 
+@media (max-width: 480px) {
+  .grid-container {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding: 8px 10px 50px;
+  }
+}
+
